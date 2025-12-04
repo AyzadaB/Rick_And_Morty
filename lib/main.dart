@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rick_and_morty/presentation/pages/character_details_page.dart';
 import 'package:rick_and_morty/presentation/pages/character_page.dart';
 
 void main() {
@@ -17,7 +18,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: const CharacterPage(),
+      home: const CharacterDetailsPage(),
     );
   }
 }

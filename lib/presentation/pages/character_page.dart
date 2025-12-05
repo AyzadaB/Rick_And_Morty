@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:rick_and_morty/presentation/bloc/character_list/character_list_bloc.dart';
+import 'package:rick_and_morty/presentation/bloc/character_list/character_list_event.dart';
+import 'package:rick_and_morty/presentation/bloc/character_list/character_list_state.dart';
 
 class CharacterPage extends StatefulWidget {
   const CharacterPage({super.key});
@@ -8,32 +12,107 @@ class CharacterPage extends StatefulWidget {
 }
 
 class CharacterPageState extends State<CharacterPage> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Первое событие
+    context.read<CharacterListBloc>().add(LoadCharacters(page: 1));
+
+    // Слушатель для пагинации
+    _scrollController.addListener(() {
+      final bloc = context.read<CharacterListBloc>();
+
+      if (_scrollController.position.pixels >=
+              _scrollController.position.maxScrollExtent - 200 &&
+          !bloc.hasReachedMax) {
+        bloc.add(LoadCharacters(page: bloc.currentPage + 1));
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text("Character List", style: TextStyle(color: Colors.black)),
       ),
-      body: Column(
-        children: [
-          GridView.builder(
-            itemCount: 6,
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3, // 3 columns
-              crossAxisSpacing: 8.0,
-              mainAxisSpacing: 8.0,
-            ),
-            itemBuilder: (context, index) {
-              return Card(
-                elevation: 4.0,
-                child: Column(
-                  children: [Image.network(''), Text("name"), Text("status")],
-                ),
-              );
-            },
-          ),
-        ],
+      body: BlocBuilder<CharacterListBloc, CharacterListState>(
+        builder: (context, state) {
+          if (state is CharactersLoading) {
+            return Center(child: CircularProgressIndicator());
+          }
+          if (state is CharactersSuccess) {
+            final characters = state.characters;
+
+            return GridView.builder(
+              controller: _scrollController,
+              padding: const EdgeInsets.all(8),
+              itemCount: characters.length + 1,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2, // 3 columns
+                crossAxisSpacing: 8.0,
+                mainAxisSpacing: 8.0,
+              ),
+              itemBuilder: (context, index) {
+                if (index == state.characters.length) {
+                  return _buildLoader();
+                }
+                final character = characters[index];
+                return Card(
+                  elevation: 8.0,
+                  color: const Color.fromARGB(255, 163, 165, 161),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      children: [
+                        Image.network(
+                          character.image,
+                          height: 100,
+                          width: 170,
+                          fit: BoxFit.cover,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          character.name,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
+                        const SizedBox(height: 5),
+                        Text(character.status),
+                        Text(character.gender),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            );
+          }
+
+          if (state is CharactersError) {
+            return Center(child: Text(state.error ?? "Error"));
+          }
+
+          return const SizedBox();
+        },
       ),
+    );
+  }
+
+  Widget _buildLoader() {
+    return const Padding(
+      padding: EdgeInsets.all(16),
+      child: Center(child: CircularProgressIndicator()),
     );
   }
 }

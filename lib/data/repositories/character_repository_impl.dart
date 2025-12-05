@@ -1,19 +1,17 @@
-import 'package:dio/dio.dart';
+import 'package:rick_and_morty/data/datasources/character_remote_datasource.dart';
 import 'package:rick_and_morty/data/models/character_model.dart';
 import 'package:rick_and_morty/domain/entity/character_entity.dart';
 import 'package:rick_and_morty/domain/repository/character_repository.dart';
 
 class CharacterRepositoryImpl implements CharacterRepository {
-  final Dio dio;
+  final CharacterRemoteDatasource remote;
 
-  CharacterRepositoryImpl(this.dio);
+  CharacterRepositoryImpl(this.remote);
 
   @override
   Future<List<CharacterEntity>> getCharacters({int page = 1}) async {
     try {
-      final response = await dio.get(
-        'https://rickandmortyapi.com/api/character?page=$page',
-      );
+      final response = await remote.getCharacters(page);
 
       final results = response.data['results'] as List;
 
@@ -28,9 +26,7 @@ class CharacterRepositoryImpl implements CharacterRepository {
   @override
   Future<CharacterEntity> getCharacterById(String id) async {
     try {
-      final response = await dio.get(
-        'https://rickandmortyapi.com/api/character/$id',
-      );
+      final response = await remote.getCharactersById(id);
 
       final model = CharacterModel.fromJson(response.data);
 

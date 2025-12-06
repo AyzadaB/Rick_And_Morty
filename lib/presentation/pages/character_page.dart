@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:rick_and_morty/domain/usecases/get_character_details.dart';
+import 'package:rick_and_morty/injection_container.dart';
+import 'package:rick_and_morty/presentation/bloc/character_details/character_details_bloc.dart';
 import 'package:rick_and_morty/presentation/bloc/character_list/character_list_bloc.dart';
 import 'package:rick_and_morty/presentation/bloc/character_list/character_list_event.dart';
 import 'package:rick_and_morty/presentation/bloc/character_list/character_list_state.dart';
+import 'package:rick_and_morty/presentation/pages/character_details_page.dart';
 
 class CharacterPage extends StatefulWidget {
   const CharacterPage({super.key});
@@ -67,31 +71,46 @@ class CharacterPageState extends State<CharacterPage> {
                   return _buildLoader();
                 }
                 final character = characters[index];
-                return Card(
-                  elevation: 8.0,
-                  color: const Color.fromARGB(255, 163, 165, 161),
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      children: [
-                        Image.network(
-                          character.image,
-                          height: 100,
-                          width: 170,
-                          fit: BoxFit.cover,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          character.name,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
+                return InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => BlocProvider(
+                          create: (_) => CharacterDetailsBloc(
+                            sl<GetCharacterDetailsUsecase>(),
                           ),
+                          child: CharacterDetailsPage(id: character.id),
                         ),
-                        const SizedBox(height: 5),
-                        Text(character.status),
-                        Text(character.gender),
-                      ],
+                      ),
+                    );
+                  },
+                  child: Card(
+                    elevation: 8.0,
+                    color: const Color.fromARGB(255, 163, 165, 161),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        children: [
+                          Image.network(
+                            character.image,
+                            height: 100,
+                            width: 170,
+                            fit: BoxFit.cover,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            character.name,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                          const SizedBox(height: 5),
+                          Text(character.status),
+                          Text(character.gender),
+                        ],
+                      ),
                     ),
                   ),
                 );

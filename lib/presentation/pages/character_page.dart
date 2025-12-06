@@ -7,6 +7,8 @@ import 'package:rick_and_morty/presentation/bloc/character_list/character_list_b
 import 'package:rick_and_morty/presentation/bloc/character_list/character_list_event.dart';
 import 'package:rick_and_morty/presentation/bloc/character_list/character_list_state.dart';
 import 'package:rick_and_morty/presentation/pages/character_details_page.dart';
+import 'package:rick_and_morty/presentation/widgets/gender_widget.dart';
+import 'package:rick_and_morty/presentation/widgets/status_widget.dart';
 
 class CharacterPage extends StatefulWidget {
   const CharacterPage({super.key});
@@ -47,7 +49,14 @@ class CharacterPageState extends State<CharacterPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Character List", style: TextStyle(color: Colors.black)),
+        title: Text(
+          "Character List",
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 30,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ),
       body: BlocBuilder<CharacterListBloc, CharacterListState>(
         builder: (context, state) {
@@ -56,15 +65,14 @@ class CharacterPageState extends State<CharacterPage> {
           }
           if (state is CharactersSuccess) {
             final characters = state.characters;
-
             return GridView.builder(
               controller: _scrollController,
               padding: const EdgeInsets.all(8),
               itemCount: characters.length + 1,
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2, // 3 columns
-                crossAxisSpacing: 8.0,
-                mainAxisSpacing: 8.0,
+                crossAxisSpacing: 7.0,
+                mainAxisSpacing: 7.0,
               ),
               itemBuilder: (context, index) {
                 if (index == state.characters.length) {
@@ -85,11 +93,14 @@ class CharacterPageState extends State<CharacterPage> {
                       ),
                     );
                   },
-                  child: Card(
-                    elevation: 8.0,
-                    color: const Color.fromARGB(255, 163, 165, 161),
+                  child: Container(
+                    width: 100,
+                    decoration: BoxDecoration(
+                      color: const Color.fromARGB(255, 115, 122, 154),
+                      borderRadius: BorderRadius.all(Radius.circular(15)),
+                    ),
                     child: Padding(
-                      padding: const EdgeInsets.all(8.0),
+                      padding: const EdgeInsets.all(6.0),
                       child: Column(
                         children: [
                           Image.network(
@@ -98,7 +109,7 @@ class CharacterPageState extends State<CharacterPage> {
                             width: 170,
                             fit: BoxFit.cover,
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 5),
                           Text(
                             character.name,
                             style: const TextStyle(
@@ -106,9 +117,9 @@ class CharacterPageState extends State<CharacterPage> {
                               fontSize: 14,
                             ),
                           ),
-                          const SizedBox(height: 5),
-                          Text(character.status),
-                          Text(character.gender),
+                          const SizedBox(height: 3),
+                          heartStatus(character.status),
+                          genderStatus(character.gender),
                         ],
                       ),
                     ),
